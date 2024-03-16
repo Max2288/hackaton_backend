@@ -7,7 +7,8 @@ x-common-backend: &common-backend
   image: stenagrafist_backend
   networks:
     - stenagrafist
-
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
 x-common-db: &common-db
   image: library/postgres:13.2
   restart: unless-stopped
@@ -26,6 +27,8 @@ x-common-db: &common-db
       POSTGRES_PORT: 5432
   networks:
     - stenagrafist
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
 
 services:
   web:
@@ -56,18 +59,23 @@ services:
     command: ["alembic", "upgrade", "head"]
     volumes:
       - ./:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   db:
     <<: *common-db
     container_name: stenagrafist_postgres
     ports:
       - 5432:5432
-
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   redis:
     container_name: redis
     image: redis:6.2.4
     ports:
       - "6379:6379"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   kafka:
     image: docker.redpanda.com/vectorized/redpanda:v22.2.2
     container_name: stenagrafist_kafka
