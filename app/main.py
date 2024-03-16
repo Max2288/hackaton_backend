@@ -3,6 +3,9 @@ from loguru import logger
 
 from app.api import api
 from app.core.config import Config
+from app.on_shutdown import stop_producer
+from app.on_startup.kafka import create_producer
+from app.on_startup.minio import create_bucket
 from app.version import VERSION
 
 from contextlib import asynccontextmanager
@@ -34,8 +37,11 @@ def setup_middleware(app: FastAPI) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await start_redis()
+    await create_bucket()
+    await create_producer()
     logger.info("START APP")
     yield
+    await stop_producer()
     logger.info("END APP")
 
 

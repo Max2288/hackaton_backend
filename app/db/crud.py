@@ -1,12 +1,12 @@
-import uuid
+
 from typing import Optional, List
 
 from loguru import logger
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import User
-from app.schemas.schema import UserEntity, UserInfo
+from app.db.models import User, Order
+from app.schemas.schema import UserEntity, UserInfo, OrderInfo
 from app.services.security import verify_password
 
 
@@ -33,6 +33,24 @@ async def create_user(session: AsyncSession, user_info: UserInfo) -> Optional[Us
         logger.error(f"Произошла ошибка при создании пользователя: {e}")
         await session.rollback()
         return None
+
+async def create_order(session: AsyncSession, order_info: OrderInfo) -> Optional[Order]:
+    try:
+        order_obj = Order(**order_info.model_dump())
+        session.add(order_obj)
+        await session.commit()
+        return order_obj
+    except Exception as e:
+        logger.error(f"Произошла ошибка при создании пользователя: {e}")
+        await session.rollback()
+        return None
+
+async def get_orders(session: AsyncSession):
+    return (
+        await session.scalars(
+            select(Order)
+        )
+    )
 
 async def get_user_by_username(session: AsyncSession, username: str) -> User | None:
     return (

@@ -42,13 +42,16 @@ class LogRoute(APIRoute):
                 body = await request.body()
             except Exception as e:
                 logger.error(e)
-            if isinstance(body, bytes):
-                text_string = body.decode('utf-8')
-                filename_start = text_string.split('filename="')[-1]
-                filename = filename_start.split('"')[0]
-                logger.info(f"filename: {filename}")
-            else:
-                logger.info(f"request body: {json.loads(body)}")
+            try:
+                if isinstance(body, bytes):
+                    text_string = body.decode('utf-8')
+                    filename_start = text_string.split('filename="')[-1]
+                    filename = filename_start.split('"')[0]
+                    logger.info(f"filename: {filename}")
+                else:
+                    logger.info(f"request body: {json.loads(body)}")
+            except Exception as e:
+                logger.error(e)
 
             try:
                 response: Response = await original_route_handler(request)

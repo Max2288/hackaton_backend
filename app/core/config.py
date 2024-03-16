@@ -35,3 +35,8 @@ class Config:
     REDIS_PASSWORD: str = os.environ["REDIS_PASSWORD"]
     REDIS_CACHE_PREFIX: str = "Stenagrafist"
     REDIS_EXPIRE_TIME: int = 60
+
+    KAFKA_BOOTSTRAP_SERVERS = ["kafka:29092"]
+    KAFKA_TOPIC = "test_stena"
+
+    BUCKET_NAME='stena'

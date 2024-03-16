@@ -4,8 +4,9 @@ from typing import Any
 
 from sqlalchemy import Float, ForeignKey, Integer, MetaData, Text
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, relationship, mapped_column
-
+import enum
 from app.core.config import Config
 from app.services.security import hash_password
 
@@ -57,12 +58,17 @@ class User(Base, IDMixin):
         self._hashed_password = hash_password(plain_password)
 
 
-class Record(Base, IDMixin):
+class OrderEnum(enum.Enum):
+    success = 'success'
+    failed = 'failed'
+    pending = 'pending'
+
+
+class Order(Base, IDMixin):
     """Модель записи в системе."""
 
-    __tablename__ = 'record'
+    __tablename__ = 'order'
     __table_args__ = {'schema': Config.SCHEMA_NAME}
 
-    raw_text: Mapped[str] = mapped_column(Text, nullable=True)
-    diar_text: Mapped[str] = mapped_column(Text, nullable=True)
-    fixed_text: Mapped[str] = mapped_column(Text, nullable=True)
+    user: Mapped[int] = mapped_column(Integer, ForeignKey(f'{Config.SCHEMA_NAME}.user.id'))
+    status: Mapped[OrderEnum] = mapped_column(ENUM(OrderEnum, inherit_schema=True), default=OrderEnum.pending)

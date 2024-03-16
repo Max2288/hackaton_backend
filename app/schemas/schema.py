@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.db.models import OrderEnum
+
 
 class UserInfo(BaseModel):
     """Модель данных для создания нового пользователя."""
@@ -12,6 +14,11 @@ class UserInfo(BaseModel):
     hashed_password: str = Field(
         description="Хеш пороля пользователя.",
     )
+
+class OrderInfo(BaseModel):
+
+    user: int
+    status: OrderEnum
 
 
 class UserEntity(BaseModel):

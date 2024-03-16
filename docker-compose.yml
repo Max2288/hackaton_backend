@@ -4,7 +4,7 @@ x-common-backend: &common-backend
   build:
     context: .
     dockerfile: Dockerfile
-  image: stenagrafist-backend
+  image: stenagrafist_backend
   networks:
     - stenagrafist
 
@@ -28,9 +28,9 @@ x-common-db: &common-db
     - stenagrafist
 
 services:
-  online_shop:
+  web:
     <<: *common-backend
-    container_name: stenagrafist-backend
+    container_name: stenagrafist_backend
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     ports:
       - 8011:8000
@@ -40,12 +40,14 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./:/app/
 
   migrations:
     <<: *common-backend
-    container_name: stenagrafist-migrations
+    container_name: stenagrafist_migrations
     env_file:
       - .env
     depends_on:
@@ -57,7 +59,7 @@ services:
 
   db:
     <<: *common-db
-    container_name: sirius-postgres
+    container_name: stenagrafist_postgres
     ports:
       - 5432:5432
 
@@ -66,31 +68,69 @@ services:
     image: redis:6.2.4
     ports:
       - "6379:6379"
-#
-#  prometheus:
-#    image: prom/prometheus
-#    container_name: prometheus
-#    command:
-#      - "--config.file=/etc/prometheus/prometheus_config.yml"
-#    ports:
-#      - "9090:9090"
-#    restart: unless-stopped
-#    depends_on:
-#      - online_shop
-#    volumes:
-#      - ./prometheus:/etc/prometheus
-#
-#  grafana:
-#    image: grafana/grafana
-#    container_name: grafana
-#    ports:
-#      - "3000:3000"
-#    restart: unless-stopped
-#    volumes:
-#      - ./grafana:/etc/grafana/provisioning/datasources
-#    depends_on:
-#      - online_shop
+  kafka:
+    image: docker.redpanda.com/vectorized/redpanda:v22.2.2
+    container_name: stenagrafist_kafka
+    command:
+      - redpanda start
+      - --smp 1
+      - --overprovisioned
+      - --node-id 0
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://kafka:29092,OUTSIDE://localhost:9092
+      - --pandaproxy-addr 0.0.0.0:8082
+      - --advertise-pandaproxy-addr localhost:8082
+    healthcheck:
+      test: [ "CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1" ]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    ports:
+      - "29092:29092"
+    networks:
+      - stenagrafist
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  console:
+      image: docker.redpanda.com/vectorized/console:latest
+      entrypoint: /bin/sh
+      command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+      environment:
+        CONFIG_FILEPATH: /tmp/config.yml
+        CONSOLE_CONFIG_FILE: |
+          kafka:
+            brokers: ["kafka:29092"]
+            schemaRegistry:
+              enabled: true
+              urls: ["http://kafka:8081"]
+            messagePack:
+              enabled: true
+          redpanda:
+            adminApi:
+              enabled: true
+              urls: ["http://kafka:9644"]
+      ports:
+        - "8080:8080"
+      networks:
+        - stenagrafist
+      depends_on:
+        - kafka
 
+  minio:
+    image: minio/minio
+    command: server --console-address ":9001" /data/
+    container_name: stenagrafist_minio
+    environment:
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - stenagrafist
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 networks:
   stenagrafist:
     external: True
