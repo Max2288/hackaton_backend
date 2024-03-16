@@ -4,7 +4,9 @@ x-common-backend: &common-backend
   build:
     context: .
     dockerfile: Dockerfile
-  image: sirius-backend
+  image: stenagrafist-backend
+  networks:
+    - stenagrafist
 
 x-common-db: &common-db
   image: library/postgres:13.2
@@ -22,11 +24,13 @@ x-common-db: &common-db
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_HOST: ${PG_HOST}
       POSTGRES_PORT: 5432
+  networks:
+    - stenagrafist
 
 services:
   online_shop:
     <<: *common-backend
-    container_name: sirius-backend
+    container_name: stenagrafist-backend
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     ports:
       - 8011:8000
@@ -41,7 +45,7 @@ services:
 
   migrations:
     <<: *common-backend
-    container_name: sirius-migrations
+    container_name: stenagrafist-migrations
     env_file:
       - .env
     depends_on:
@@ -87,3 +91,6 @@ services:
 #    depends_on:
 #      - online_shop
 
+networks:
+  stenagrafist:
+    external: True
