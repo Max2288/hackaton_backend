@@ -15,10 +15,11 @@ class UserInfo(BaseModel):
         description="Хеш пороля пользователя.",
     )
 
-class OrderInfo(BaseModel):
 
+class OrderInfo(BaseModel):
     user: int
     status: OrderEnum
+    name: str
 
 
 class UserEntity(BaseModel):

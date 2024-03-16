@@ -46,10 +46,11 @@ async def login(
         Token: Модель токена доступа.
     """
     from loguru import logger
+
     logger.info(form_data)
     user = await get_user(session, form_data)
     if not user:
-        raise  HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     access_token_expires = timedelta(minutes=10)
     access_token = create_access_token(
         data={"sub": user.username},

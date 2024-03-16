@@ -15,8 +15,6 @@ BASE_DIR = Path(__file__).parent
 FIXTURES_PATH = BASE_DIR / "fixtures"
 
 
-
-
 @pytest.mark.parametrize(
     ("id", "name", "description", "price", "expected_status"),
     [
@@ -52,13 +50,9 @@ async def test_get_products(
     client: AsyncClient,
     db_session: None,
 ) -> None:
-    response = await client.get(
-        URLS["sirius"]["api"]["v1"]["product"]["get_all_products"]
-    )
+    response = await client.get(URLS["sirius"]["api"]["v1"]["product"]["get_all_products"])
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) >= 1
-
-
 
 
 @pytest.mark.parametrize(
@@ -89,6 +83,7 @@ async def test_update_product(
     )
     product_id = response.json()["id"]
     from loguru import logger
+
     logger.info(f'{URLS["sirius"]["api"]["v1"]["product"]["update_product"]}{product_id}')
     response = await client.put(
         f'{URLS["sirius"]["api"]["v1"]["product"]["update_product"]}{product_id}',
@@ -125,7 +120,5 @@ async def test_delete_product(
         json={"id": str(id), "name": name, "description": description, "price": price},
     )
     product_id = response.json()["id"]
-    response = await client.delete(
-        f'{URLS["sirius"]["api"]["v1"]["product"]["delete_product"]}{product_id}'
-    )
+    response = await client.delete(f'{URLS["sirius"]["api"]["v1"]["product"]["delete_product"]}{product_id}')
     assert response.status_code == expected_status

@@ -1,6 +1,6 @@
 from typing import AsyncGenerator, List
 from pathlib import Path
-import  json
+import json
 import datetime
 from sqlalchemy import insert
 
@@ -16,6 +16,7 @@ from tests.my_types import FixtureFunctionT
 from app.db.session import engine, get_db
 from app.db.redis import get_redis
 from app.db.models import metadata
+
 
 @pytest.fixture()
 async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
@@ -64,6 +65,7 @@ def _mock_redis(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(redis, "set", TestRedisClient.set)
     monkeypatch.setattr(redis, "get", TestRedisClient.get)
     monkeypatch.setattr(redis, "delete", TestRedisClient.delete)
+
 
 @pytest.fixture()
 async def _load_fixtures(db_session: AsyncSession, fixtures: List[Path]) -> FixtureFunctionT:

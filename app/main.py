@@ -3,6 +3,7 @@ from loguru import logger
 
 from app.api import api
 from app.core.config import Config
+from app.middleware.size import LimitUploadSize
 from app.on_shutdown import stop_producer
 from app.on_startup.kafka import create_producer
 from app.on_startup.minio import create_bucket
@@ -24,6 +25,7 @@ logger.add(
     retention=5,
 )
 
+
 def setup_middleware(app: FastAPI) -> None:
     app.add_middleware(
         CORSMiddleware,
@@ -32,7 +34,9 @@ def setup_middleware(app: FastAPI) -> None:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
     app.middleware("http")(prometheus_metrics)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -48,15 +52,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     app = FastAPI(
         title=Config.SERVICE_NAME,
-        debug=Config.DEBUG, 
-        description=Config.DESCRIPTION, 
+        debug=Config.DEBUG,
+        description=Config.DESCRIPTION,
         version=VERSION,
-        lifespan=lifespan
+        lifespan=lifespan,
     )
     setup_middleware(app)
     PATH_PREFIX = "/stenagrafist" + Config.API_V1_STR
     app.add_route("/metrics", metrics)
     app.include_router(api.router, prefix=PATH_PREFIX)
     return app
+
 
 app = create_app()

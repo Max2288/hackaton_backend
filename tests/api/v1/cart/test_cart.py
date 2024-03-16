@@ -15,6 +15,7 @@ BASE_DIR = Path(__file__).parent
 
 FIXTURES_PATH = BASE_DIR / "fixtures"
 
+
 def create_product(client: AsyncClient, product_data: dict):
     return client.post(URLS["sirius"]["api"]["v1"]["product"]["create_product"], json=product_data)
 
@@ -27,6 +28,7 @@ def add_to_cart(client: AsyncClient, user_data: dict, product_data: dict, quanti
         json={"user_info": user_data, "product_info": product_data},
         headers=headers,
     )
+
 
 @pytest.mark.parametrize(
     ("username", "password", "id", "name", "description", "price", "expected_status", "headers", "fixtures"),
@@ -61,21 +63,15 @@ async def test_add_to_cart_and_place_order(
     db_session: None,
 ) -> None:
     user_data = {"username": username, "password": password}
-    product_data = {
-        "id": str(id),
-        "name": name,
-        "description":description,
-        "price": price
-    }
+    product_data = {"id": str(id), "name": name, "description": description, "price": price}
     await create_product(client, product_data)
-    await add_to_cart(client, user_data, product_data, random.randint(10,20))
+    await add_to_cart(client, user_data, product_data, random.randint(10, 20))
     response = await client.post(
         URLS["sirius"]["api"]["v1"]["cart"]["place_order"],
         json={"username": username, "password": password},
         headers=headers,
     )
     assert response.status_code == expected_status
-
 
 
 @pytest.mark.parametrize(
@@ -111,24 +107,17 @@ async def test_update_cart(
     db_session: None,
 ) -> None:
     user_data = {"username": username, "password": password}
-    product_data = {
-        "id": str(id),
-        "name": name,
-        "description": description,
-        "price": price
-    }
+    product_data = {"id": str(id), "name": name, "description": description, "price": price}
     await create_product(client, product_data)
     await add_to_cart(client, user_data, product_data, random.randint(10, 20))
 
     user_db = await get_user_by_username(db_session, username)
     response = await client.put(
-        URLS["sirius"]["api"]["v1"]["cart"]["update_cart_product"] +\
-        f"{id}?quantity={random.randint(5, 10)}&user_id={user_db.id}",
-        headers=headers
+        URLS["sirius"]["api"]["v1"]["cart"]["update_cart_product"]
+        + f"{id}?quantity={random.randint(5, 10)}&user_id={user_db.id}",
+        headers=headers,
     )
     assert response.status_code == expected_status
-
-
 
 
 @pytest.mark.parametrize(
@@ -164,12 +153,7 @@ async def test_delete_cart(
     db_session: None,
 ) -> None:
     user_data = {"username": username, "password": password}
-    product_data = {
-        "id": str(id),
-        "name": name,
-        "description": description,
-        "price": price
-    }
+    product_data = {"id": str(id), "name": name, "description": description, "price": price}
     await create_product(client, product_data)
     await add_to_cart(client, user_data, product_data, random.randint(10, 20))
     user_db = await get_user_by_username(db_session, username)

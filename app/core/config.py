@@ -14,10 +14,7 @@ class Config:
     """
 
     SQLALCHEMY_DATABASE_URI: str = 'postgresql+asyncpg://{0}:{1}@{2}/{3}'.format(
-        os.environ["PG_USER"], 
-        os.environ["PG_PASSWORD"], 
-        os.environ["PG_HOST"],
-        os.environ["DB_NAME"]
+        os.environ["PG_USER"], os.environ["PG_PASSWORD"], os.environ["PG_HOST"], os.environ["DB_NAME"]
     )
     SCHEMA_NAME: str = os.environ["SCHEMA_NAME"]
 
@@ -39,4 +36,4 @@ class Config:
     KAFKA_BOOTSTRAP_SERVERS = ["kafka:29092"]
     KAFKA_TOPIC = "test_stena"
 
-    BUCKET_NAME='stena'
+    BUCKET_NAME = 'stena'

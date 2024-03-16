@@ -1,4 +1,3 @@
-
 from typing import Optional, List
 
 from loguru import logger
@@ -34,6 +33,7 @@ async def create_user(session: AsyncSession, user_info: UserInfo) -> Optional[Us
         await session.rollback()
         return None
 
+
 async def create_order(session: AsyncSession, order_info: OrderInfo) -> Optional[Order]:
     try:
         order_obj = Order(**order_info.model_dump())
@@ -45,20 +45,18 @@ async def create_order(session: AsyncSession, order_info: OrderInfo) -> Optional
         await session.rollback()
         return None
 
+
 async def get_orders(session: AsyncSession):
-    return (
-        await session.scalars(
-            select(Order)
-        )
-    )
+    return await session.scalars(select(Order))
+
 
 async def get_user_by_username(session: AsyncSession, username: str) -> User | None:
     return (
-            await session.scalars(
-                select(User).where(
-                    User.username == username,
-                )
+        await session.scalars(
+            select(User).where(
+                User.username == username,
             )
+        )
     ).one_or_none()
 
 

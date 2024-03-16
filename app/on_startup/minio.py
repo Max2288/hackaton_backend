@@ -4,12 +4,7 @@ from app.core.config import Config
 
 
 async def create_bucket():
-    client = Minio(
-        "host.docker.internal:9000",
-        access_key="minioadmin",
-        secret_key="minioadmin",
-        secure=False
-    )
+    client = Minio("host.docker.internal:9000", access_key="minioadmin", secret_key="minioadmin", secure=False)
     result = await client.bucket_exists(Config.BUCKET_NAME)
     if not result:
         print("Creating bucket")

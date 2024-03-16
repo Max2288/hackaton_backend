@@ -45,7 +45,7 @@ class User(Base, IDMixin):
 
         Returns:
             str: Хешированный пароль пользователя.
-        """        
+        """
         return self._hashed_password
 
     @hashed_password.setter
@@ -54,7 +54,7 @@ class User(Base, IDMixin):
 
         Args:
             plain_password (str): Нехешированный пароль пользователя.
-        """        
+        """
         self._hashed_password = hash_password(plain_password)
 
 
@@ -72,3 +72,4 @@ class Order(Base, IDMixin):
 
     user: Mapped[int] = mapped_column(Integer, ForeignKey(f'{Config.SCHEMA_NAME}.user.id'))
     status: Mapped[OrderEnum] = mapped_column(ENUM(OrderEnum, inherit_schema=True), default=OrderEnum.pending)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
