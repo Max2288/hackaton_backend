@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import asdict, dataclass
 from typing import Any
 
 from sqlalchemy import Float, ForeignKey, Integer, MetaData, Text
@@ -63,7 +64,7 @@ class OrderEnum(enum.Enum):
     failed = 'failed'
     pending = 'pending'
 
-
+@dataclass
 class Order(Base, IDMixin):
     """Модель записи в системе."""
 
@@ -73,3 +74,6 @@ class Order(Base, IDMixin):
     user: Mapped[int] = mapped_column(Integer, ForeignKey(f'{Config.SCHEMA_NAME}.user.id'))
     status: Mapped[OrderEnum] = mapped_column(ENUM(OrderEnum, inherit_schema=True), default=OrderEnum.pending)
     name: Mapped[str] = mapped_column(Text, nullable=False)
+
+    def to_dict(self):
+        return asdict(self)

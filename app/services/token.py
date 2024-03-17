@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
+from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
@@ -27,3 +28,19 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, Config.SALT, algorithm=Config.ALGORITHM)
     return encoded_jwt
+
+
+def decode_access_token(token: str) -> dict:
+    """Декодирует токен доступа и возвращает содержащиеся в нем данные.
+
+    Args:
+        token (str): Токен доступа для декодирования.
+
+    Returns:
+        dict: Содержащиеся в токене данные.
+    """
+    try:
+        decoded_token = jwt.decode(token, Config.SALT, algorithms=[Config.ALGORITHM])
+        return decoded_token
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Неверные учетные данные")

@@ -1,5 +1,6 @@
 import time
 
+from aiokafka import AIOKafkaConsumer
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from fastapi.responses import ORJSONResponse
 from loguru import logger
@@ -72,3 +73,4 @@ async def change_status(
     except Exception as e:
         logger.error(f"Произошла ошибка во создания заказа: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+

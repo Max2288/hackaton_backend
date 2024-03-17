@@ -46,8 +46,14 @@ async def create_order(session: AsyncSession, order_info: OrderInfo) -> Optional
         return None
 
 
-async def get_orders(session: AsyncSession):
-    return await session.scalars(select(Order))
+async def get_orders(session: AsyncSession, user_id: int):
+    orders = await session.scalars(
+        select(Order).filter(
+            Order.user == user_id,
+        )
+    )
+    return [order.to_dict() for order in orders]
+
 
 
 async def get_user_by_username(session: AsyncSession, username: str) -> User | None:
@@ -55,6 +61,16 @@ async def get_user_by_username(session: AsyncSession, username: str) -> User | N
         await session.scalars(
             select(User).where(
                 User.username == username,
+            )
+        )
+    ).one_or_none()
+
+
+async def get_user_by_id(session: AsyncSession, id: int) -> User | None:
+    return (
+        await session.scalars(
+            select(User).where(
+                User.id == id,
             )
         )
     ).one_or_none()

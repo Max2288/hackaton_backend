@@ -35,5 +35,6 @@ class Config:
 
     KAFKA_BOOTSTRAP_SERVERS = ["kafka:29092"]
     KAFKA_TOPIC = "test_stena"
+    KAFKA_CONSUMER_GROUP = "kafka_consumer_group"
 
     BUCKET_NAME = 'stena'

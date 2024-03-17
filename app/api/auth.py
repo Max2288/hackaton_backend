@@ -45,9 +45,6 @@ async def login(
     Returns:
         Token: Модель токена доступа.
     """
-    from loguru import logger
-
-    logger.info(form_data)
     user = await get_user(session, form_data)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

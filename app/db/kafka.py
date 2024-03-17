@@ -3,6 +3,7 @@ from typing import List
 
 from aiokafka.producer import AIOKafkaProducer
 
+
 producer: AIOKafkaProducer
 partitions: List[int]
 

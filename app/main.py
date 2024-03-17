@@ -1,6 +1,3 @@
-from fastapi import FastAPI
-from loguru import logger
-
 from app.api import api
 from app.core.config import Config
 from app.middleware.size import LimitUploadSize
