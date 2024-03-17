@@ -66,6 +66,16 @@ async def get_user_by_username(session: AsyncSession, username: str) -> User | N
     ).one_or_none()
 
 
+async def get_order_by_id(session: AsyncSession, order_id: int):
+    return (
+        await session.scalars(
+            select(Order).where(
+                User.id == order_id,
+            )
+        )
+    ).one_or_none()
+
+
 async def get_user_by_id(session: AsyncSession, id: int) -> User | None:
     return (
         await session.scalars(

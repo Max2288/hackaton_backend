@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.log_route import LogRoute
 from app.core.exceptions import UserNotFoundException, OrderNotFoundException
 from app.db import session
-from app.db.crud import get_user_by_username, create_order
+from app.db.crud import get_user_by_username, create_order, get_order_by_id
 from app.db.kafka import get_producer, get_partition
 from app.db.models import OrderEnum
 from app.schemas.schema import OrderInfo
@@ -62,10 +62,11 @@ async def load_to_minio(
 
 @router.post("/change", status_code=status.HTTP_200_OK)
 async def change_status(
-    user_id: int, status_name: OrderEnum, order_name: str, db: AsyncSession = Depends(session.get_db)
+    user_id: int, status_name: OrderEnum, order_id: int, db: AsyncSession = Depends(session.get_db)
 ):
     try:
-        order_data = OrderInfo(user=user_id, status=status_name, name=order_name)
+        order = await get_order_by_id(db, order_id)
+        order_data = OrderInfo(user=user_id, status=status_name, name=order.name)
         order = await create_order(db, order_data)
         if order is None:
             raise OrderNotFoundException("Order not created")
